@@ -5,8 +5,6 @@ import { ShoppingBag, RefreshCw, Settings2, ExternalLink } from "lucide-react";
 import OrderActions from "./order-actions"; // IMPORTACIÓN CORREGIDA
 import Link from "next/link";
 
-
-
 export default async function AdminDashboard() {
   // 1. Traer Ajustes
   const settings = await prisma.globalSettings.findUnique({ where: { id: 1 } });
@@ -182,7 +180,7 @@ export default async function AdminDashboard() {
                   </div>
 
                   {(() => {
-                    const grouped: any = {};
+                    const grouped: Record<string, any[]> = {};
                     order.items.forEach((item: any) => {
                       const provName =
                         item.product?.providerProducts?.[0]?.provider?.name ||
