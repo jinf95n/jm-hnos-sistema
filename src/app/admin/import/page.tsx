@@ -1,32 +1,46 @@
 "use client";
 import { useState } from "react";
-import { importABC, importCarmar, importFadepaText } from "./actions";
+import { importABC, importCarmar, importFadepaText, importFadepaExcel } from "./actions";
 
 export default function ImportPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [fadepaText, setFadepaText] = useState("");
 
-  const handleUpload = async (
-    e: React.FormEvent<HTMLFormElement>,
-    type: "ABC" | "CARMAR" | "FADEPA",
-  ) => {
-    e.preventDefault();
-    setLoading(type);
-    const formData = new FormData(e.currentTarget);
-    const result =
-      type === "ABC" ? await importABC(formData) : await importCarmar(formData);
-    setMessage(
-      result.success
-        ? `¡Éxito! ${result.count} productos de ${type} actualizados.`
-        : result.error || "Error",
-    );
-    setLoading(null);
-  };
+  const handleUpload = async (e: React.FormEvent<HTMLFormElement>, type: 'ABC' | 'CARMAR' | 'FADEPA') => {
+  e.preventDefault();
+  setLoading(type);
+  setMessage(`Procesando lista de ${type}...`);
+
+  const formData = new FormData(e.currentTarget);
+  
+  // Ejecutamos la acción según el tipo
+  let result;
+  if (type === 'ABC') result = await importABC(formData);
+  else if (type === 'CARMAR') result = await importCarmar(formData);
+  else result = await importFadepaExcel(formData);
+
+  // Forzamos el tipo para que TypeScript no proteste por el campo 'error'
+  const finalResult = result as { success: boolean; count?: number; error?: string };
+
+  if (finalResult.success) {
+    setMessage(`¡Éxito! ${finalResult.count} productos de ${type} sincronizados.`);
+    // Limpiamos el input de archivo
+    (e.target as HTMLFormElement).reset();
+  } else {
+    setMessage(finalResult.error || `Error al importar ${type}.`);
+  }
+  
+  setLoading(null);
+};
 
   const handleFadepaPaste = async () => {
     setLoading("FADEPA");
-    const result = await importFadepaText(fadepaText);
+    const result = (await importFadepaText(fadepaText)) as {
+      success: boolean;
+      count?: number;
+      error?: string;
+    };
     setMessage(
       result.success
         ? `¡Éxito! ${result.count} productos de FADEPA detectados.`
