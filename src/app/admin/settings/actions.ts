@@ -6,7 +6,7 @@ export async function updateSettings(formData: FormData) {
   const margin = parseFloat(formData.get('margin') as string);
   const interest = parseFloat(formData.get('interest') as string);
 
-  if (isNaN(margin) || isNaN(interest)) return { success: false };
+  if (isNaN(margin) || isNaN(interest)) return;
 
   await prisma.globalSettings.upsert({
     where: { id: 1 },
@@ -21,6 +21,4 @@ export async function updateSettings(formData: FormData) {
   revalidatePath('/admin');
   revalidatePath('/admin/products');
   revalidatePath('/catalogo');
-  
-  return { success: true }; // <--- VITAL: Que devuelva el objeto
 }

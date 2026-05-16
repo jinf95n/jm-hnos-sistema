@@ -67,12 +67,7 @@ export default async function AdminDashboard() {
             </h2>
           </div>
 
-          <form
-            action={async (formData) => {
-              await updateSettings(formData);
-            }}
-            className="space-y-8"
-          >
+          <form action={updateSettings} className="space-y-8">
             <div>
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                 Margen Ganancia (%)
