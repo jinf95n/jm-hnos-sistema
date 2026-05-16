@@ -8,19 +8,20 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setSuccess(false);
+  e.preventDefault();
+  setLoading(true);
+  setSuccess(false);
 
-    const formData = new FormData(e.currentTarget);
-    const result = await updateSettings(formData);
-    if (result?.success) {
-    
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 5000);
-    }
-    setLoading(false);
+  const formData = new FormData(e.currentTarget);
+  // Forzamos a TS a entender que esto devuelve el objeto de éxito
+  const result = await updateSettings(formData) as { success: boolean };
+
+  if (result?.success) {
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 5000);
   }
+  setLoading(false);
+}
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
