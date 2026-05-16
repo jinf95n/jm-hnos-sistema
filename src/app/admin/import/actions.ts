@@ -137,21 +137,34 @@ export async function importCarmar(formData: FormData) {
     console.log(`🚀 Sincronizando CARMAR: ${excelData.length} filas...`);
 
     const validRows = excelData.map(row => {
-      // Normalizar columnas de Carmar: CODIGO, DESCRIPCION, MARCA, UNIDAD, PRECIO
+      // 1. Normalizamos las llaves de la fila (pasamos a minúsculas y quitamos espacios)
       const cleanRow: any = {};
-      Object.keys(row).forEach(k => cleanRow[k.toLowerCase().trim()] = row[k]);
-      
-      const sku = String(cleanRow['codigo'] || "").trim();
-      const desc = String(cleanRow['descripcion'] || "").trim();
-      const marca = String(cleanRow['marca'] || "").trim();
-      const priceRaw = cleanRow['precio'] || 0;
-      
-      let price = 0;
-      if (typeof priceRaw === 'number') price = priceRaw;
-      else price = parseFloat(String(priceRaw).replace(/[$. ]/g, '').replace(',', '.'));
+      Object.keys(row).forEach(k => {
+        const cleanKey = k.trim().toLowerCase();
+        cleanRow[cleanKey] = row[k];
+      });
 
-      // Formateamos el nombre para que incluya la marca (ayuda mucho al cliente)
-      const fullName = marca ? `${desc} (${marca})` : desc;
+      // 2. Extraemos los datos usando los encabezados reales de CARMAR
+      // COD_ARTIC -> sku | DESCRIP -> name | DESC_ADIC -> info extra/marca | PRECIO -> price
+      const sku = String(cleanRow['cod_artic'] || "").trim();
+      const desc = String(cleanRow['descrip'] || "").trim();
+      const adicional = String(cleanRow['desc_adic'] || "").trim();
+      const priceRaw = cleanRow['precio'] || 0;
+
+      // 3. Limpieza de precio (maneja números o strings con formato argentino)
+      let price = 0;
+      if (typeof priceRaw === 'number') {
+        price = priceRaw;
+      } else {
+        // Quitamos $, puntos de miles y cambiamos coma por punto decimal
+        const cleanPrice = String(priceRaw).replace(/[$. ]/g, '').replace(',', '.');
+        price = parseFloat(cleanPrice);
+      }
+
+      // 4. Formateamos el nombre: "DESCRIPCION (INFORMACION ADICIONAL)"
+      const fullName = adicional && adicional !== "0" 
+        ? `${desc} (${adicional})` 
+        : desc;
 
       return { sku, name: fullName, price };
     }).filter(r => r.name !== "" && r.price > 0 && r.sku !== "");
@@ -248,5 +261,81 @@ export async function importFadepaText(text: string) {
   } catch (error) {
     console.error(error);
     return { success: false, error: "Error procesando texto de Fadepa" };
+  }
+}
+
+export async function importFadepaExcel(formData: FormData) {
+  try {
+    const file = formData.get('file') as File;
+    if (!file) throw new Error("No hay archivo");
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    // Importante: Empezamos a leer desde la fila 1 (donde están los encabezados reales)
+    const excelData = XLSX.utils.sheet_to_json(sheet) as any[];
+
+    const provider = await prisma.provider.findUnique({ where: { name: 'FADEPA' } });
+    if (!provider) throw new Error("Proveedor FADEPA no encontrado");
+
+    const validRows = excelData.map(row => {
+      // Mapeo según tu captura: Producto (SKU), Nombre (DESC), L. Precio SJ (PRECIO)
+      const sku = String(row['Producto'] || "").trim();
+      const name = String(row['Nombre'] || "").trim();
+      const priceRaw = row['L. Precio SJ'] || 0;
+      
+      let price = 0;
+      if (typeof priceRaw === 'number') price = priceRaw;
+      else price = parseFloat(String(priceRaw).replace(/[$. ]/g, '').replace(',', '.'));
+
+      // CÁLCULO DE DESCUENTO EN CASCADA (12% + 15% + 10%)
+      // Esto equivale a multiplicar por 0.88 * 0.85 * 0.90
+      const netoFadepa = price * 0.88 * 0.85 * 0.90;
+      
+      // Como nuestro sistema ya aplica un "baseDiscount", vamos a "engañarlo" un poco 
+      // para que el resultado final sea este neto. Seteamos el precio de lista 
+      // ya con el descuento en cascada aplicado para que sea más simple.
+      return { sku, name, price: netoFadepa };
+    }).filter(r => r.name !== "" && r.price > 0 && r.sku !== "");
+
+    // Carga masiva en bloques de 100
+    const batchSize = 100;
+    for (let i = 0; i < validRows.length; i += batchSize) {
+      const batch = validRows.slice(i, i + batchSize);
+      await prisma.$transaction(
+        batch.map((item) => 
+          prisma.product.upsert({
+            where: { internalSku: item.sku },
+            update: {
+              name: item.name,
+              providerProducts: {
+                upsert: {
+                  where: { providerId_providerSku: { providerId: provider.id, providerSku: item.sku } },
+                  // Aquí guardamos el precio YA NETO (cascada aplicada)
+                  // Entonces en el seed pondremos 0% para FADEPA.
+                  update: { providerPrice: item.price },
+                  create: { providerSku: item.sku, providerPrice: item.price, providerId: provider.id }
+                }
+              }
+            },
+            create: {
+              internalSku: item.sku,
+              name: item.name,
+              category: 'Pinturería',
+              providerProducts: {
+                create: { providerSku: item.sku, providerPrice: item.price, providerId: provider.id }
+              }
+            }
+          })
+        )
+      );
+    }
+
+    revalidatePath('/');
+    return { success: true, count: validRows.length };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Error en FADEPA" };
   }
 }
