@@ -9,13 +9,15 @@ export default function LoginPage() {
   );
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-         redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-  };
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      // Forzamos la ruta completa para evitar que Supabase use el Site URL por defecto
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  })
+  if (error) console.log("Error de Auth:", error.message)
+}
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">

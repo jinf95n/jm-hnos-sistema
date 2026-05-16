@@ -4,17 +4,34 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { LogOut, LayoutDashboard, List, ShoppingBag, User as UserIcon, ShieldCheck } from 'lucide-react';
 import { ADMIN_EMAILS } from '@/app/lib/config';
+import { useEffect, useState } from 'react'; 
 
-export default function Navbar({ userEmail }: { userEmail?: string }) {
+export default function Navbar() { 
+  const [userEmail, setUserEmail] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
+  
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserEmail(user?.email);
+      setLoading(false);
+    };
+    getUser();
+  }, [supabase]);
+
+  if (loading) return <div className="h-16 bg-white border-b border-slate-100" />;
+  if (!userEmail) return null; // No mostramos nada si no hay login
+
+
   // VITAL: Ahora isAdmin depende del MAIL, no de la URL
-  const isAdminUser = userEmail ? ADMIN_EMAILS.includes(userEmail) : false;
+  const isAdminUser = ADMIN_EMAILS.includes(userEmail);
   const isInsideAdmin = pathname.startsWith('/admin');
 
   const handleLogout = async () => {

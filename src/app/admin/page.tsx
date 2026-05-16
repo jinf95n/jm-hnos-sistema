@@ -1,8 +1,11 @@
+export const dynamic = 'force-dynamic';
 import { prisma } from "@/app/lib/prisma";
 import { updateSettings } from "./settings/actions";
 import { ShoppingBag, RefreshCw, Settings2, ExternalLink } from "lucide-react";
 import OrderActions from "./order-actions"; // IMPORTACIÓN CORREGIDA
 import Link from "next/link";
+
+
 
 export default async function AdminDashboard() {
   // 1. Traer Ajustes
