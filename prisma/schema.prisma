@@ -1,0 +1,76 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  internalSku  String   @unique
+  name         String
+  description  String?
+  category     String
+  image        String?
+  published    Boolean  @default(true)
+  baseMargin   Float    @default(30.0)
+  cardInterest Float    @default(15.0)
+  providerProducts ProviderProduct[]
+  orderItems       OrderItem[]
+}
+
+model Provider {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  baseDiscount  Float    @default(0.0)
+  products      ProviderProduct[]
+}
+
+model ProviderProduct {
+  id            String   @id @default(cuid())
+  providerSku   String
+  providerPrice Float
+  productId     String
+  providerId    String
+  product       Product  @relation(fields: [productId], references: [id])
+  provider      Provider @relation(fields: [providerId], references: [id])
+  @@unique([providerId, providerSku])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("CLIENT")
+  orders    Order[]
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  status    String   @default("PENDING")
+  total     Float
+  createdAt DateTime @default(now())
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model GlobalSettings {
+  id                Int      @id @default(1)
+  defaultMargin     Float    @default(30.0)
+  defaultCardInterest Float  @default(15.0)
+  updatedAt         DateTime @updatedAt
+}
