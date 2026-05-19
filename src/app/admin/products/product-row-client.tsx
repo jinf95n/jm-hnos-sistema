@@ -49,7 +49,7 @@ export default function ProductRowName({ product, prices }: any) {
                 <span>${prices.costoNeto.toLocaleString("es-AR")}</span>
               </div>
               <div className="flex justify-between border-b pb-2 text-[#103f79]">
-                <span>Venta Cash:</span>
+                <span>Contado:</span>
                 <span>${prices.precioContado.toLocaleString("es-AR")}</span>
               </div>
             </div>

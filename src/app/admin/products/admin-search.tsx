@@ -31,7 +31,7 @@ export default function AdminSearch({ initialQuery }: { initialQuery: string }) 
         type="text"
         value={searchTerm}
         placeholder="Buscar en inventario..."
-        className="w-full bg-white border-2 border-slate-100 rounded-2xl py-3 pl-12 pr-10 text-sm focus:border-blue-500 outline-none transition-all shadow-sm"
+        className="w-full font-black text-slate-600 bg-white border-2 border-slate-100 rounded-2xl py-3 pl-12 pr-10 text-sm focus:border-blue-500 outline-none transition-all shadow-sm"
         onChange={(e) => setSearchTerm(e.target.value)}
       />
       {searchTerm && !isPending && (
