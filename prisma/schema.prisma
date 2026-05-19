@@ -15,6 +15,7 @@ model Product {
   description  String?
   category     String
   image        String?
+  customMargin Float? 
   published    Boolean  @default(true)
   baseMargin   Float    @default(30.0)
   cardInterest Float    @default(15.0)

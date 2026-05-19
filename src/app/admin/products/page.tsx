@@ -1,122 +1,101 @@
+export const dynamic = 'force-dynamic';
+
 import { prisma } from "@/app/lib/prisma";
 import { calculatePrices } from "@/app/lib/pricing-engine";
-import { ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, Hash, DollarSign } from "lucide-react";
 import Link from "next/link";
 import AdminSearch from "./admin-search";
 import VisibilityToggle from "./visibility-toggle";
+import MarginEditor from "./margin-editor";
 
-export default async function AdminProductsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; page?: string }>;
-}) {
+export default async function AdminProductsPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
   const params = await searchParams;
   const query = params.q || "";
   const page = Number(params.page) || 1;
   const pageSize = 25;
   const skip = (page - 1) * pageSize;
 
-  const keywords = query.split(" ").filter(word => word.length > 2);
-  const searchFilter = {
-    AND: keywords.map(word => {
-      const stem = word.length > 5 ? word.substring(0, word.length - 2) : word;
-      return { name: { contains: stem, mode: 'insensitive' as const } };
+  const [settings, totalProducts, products] = await Promise.all([
+    prisma.globalSettings.findUnique({ where: { id: 1 } }),
+    prisma.product.count({
+      where: { AND: query.split(" ").filter(w => w.length > 2).map(w => ({ name: { contains: w.substring(0, w.length - 2), mode: 'insensitive' as const } })) }
+    }),
+    prisma.product.findMany({
+      where: { AND: query.split(" ").filter(w => w.length > 2).map(w => ({ name: { contains: w.substring(0, w.length - 2), mode: 'insensitive' as const } })) },
+      include: { providerProducts: { include: { provider: true } } },
+      orderBy: { name: 'asc' },
+      take: pageSize,
+      skip: skip,
     })
-  };
+  ]);
 
-  const totalProducts = await prisma.product.count({ where: searchFilter });
-  const products = await prisma.product.findMany({
-    where: searchFilter,
-    include: { providerProducts: { include: { provider: true } } },
-    orderBy: { name: 'asc' },
-    take: pageSize,
-    skip: skip,
-  });
-
+  const defaultMargin = settings?.defaultMargin || 30;
   const totalPages = Math.ceil(totalProducts / pageSize);
 
   return (
-    <div className="p-4 sm:p-8 bg-slate-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-          <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter">INVENTARIO</h1>
-            <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Control de visibilidad y rentabilidad</p>
-          </div>
+    <div className="p-4 sm:p-8 bg-[#f8fafc] min-h-screen">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <header className="flex flex-col md:flex-row justify-between gap-4">
+          <h1 className="text-3xl font-black text-[#103f79]">INVENTARIO</h1>
           <AdminSearch initialQuery={query} />
         </header>
 
-        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                <th className="p-6 text-center">Visible</th>
-                <th className="p-6">Producto / SKU</th>
-                <th className="p-6">Costo Neto</th>
-                <th className="p-6 text-green-600">Ganancia (30%)</th>
-                <th className="p-6 text-blue-600 font-bold underline">Venta Contado</th>
-                <th className="p-6 text-indigo-600">Venta Web</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {products.map((product) => {
-                const provProd = product.providerProducts[0];
-                if (!provProd) return null;
-                
-                const prices = calculatePrices(
-                  provProd.providerPrice,
-                  provProd.provider.baseDiscount,
-                  product.baseMargin,
-                  product.cardInterest
-                );
+        <div className="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <th className="p-4 text-center w-16">Pub.</th>
+                  <th className="p-4">Producto</th>
+                  <th className="p-4">Costo Neto</th>
+                  <th className="p-4">Margen %</th>
+                  <th className="p-4 text-[#103f79]">Contado</th>
+                  <th className="p-4 text-indigo-600">3 Cuotas</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {products.map((p) => {
+                  const prov = p.providerProducts[0];
+                  if (!prov) return null;
+                  const res = calculatePrices(prov.providerPrice, prov.provider.baseDiscount, defaultMargin, p.cardInterest, p.customMargin);
 
-                const gananciaEfectivo = prices.precioContado - prices.costoNeto;
-
-                return (
-                  <tr key={product.id} className={`transition-colors ${product.published ? 'hover:bg-slate-50/50' : 'bg-slate-50/30 opacity-60'}`}>
-                    <td className="p-6">
-                      <VisibilityToggle id={product.id} initialState={product.published} />
-                    </td>
-                    <td className="p-6">
-                      <span className="text-[10px] font-bold text-slate-300 block mb-1">{product.internalSku} | {provProd.provider.name}</span>
-                      <span className="text-xs font-black text-slate-800 uppercase leading-tight block max-w-xs">{product.name}</span>
-                    </td>
-                    <td className="p-6">
-                      <span className="text-[10px] text-slate-400 line-through block">${provProd.providerPrice.toLocaleString()}</span>
-                      <span className="text-sm font-bold text-slate-600">${prices.costoNeto.toLocaleString()}</span>
-                    </td>
-                    <td className="p-6">
-                      <div className="bg-green-50 text-green-700 px-3 py-1 rounded-full inline-block text-sm font-black border border-green-100">
-                        +${gananciaEfectivo.toLocaleString(undefined, {minimumFractionDigits: 2})}
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <span className="text-lg font-black text-blue-600 tracking-tighter">
-                        ${prices.precioContado.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="p-6">
-                      <div className="text-sm font-black text-indigo-700">
-                        ${prices.precioWeb.toLocaleString()}
-                      </div>
-                      <div className="text-[10px] font-bold text-indigo-300 uppercase">
-                        3 x ${prices.valorCuota.toLocaleString()}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {/* Paginación */}
-          <div className="p-8 bg-slate-50/30 border-t flex justify-between items-center">
-            <span className="text-[10px] font-black text-slate-300 uppercase">Total: {totalProducts} items | Pág {page} de {totalPages}</span>
-            <div className="flex gap-3">
-              <Link href={`?q=${query}&page=${Math.max(1, page - 1)}`} className={`p-3 rounded-2xl border bg-white ${page <= 1 ? 'opacity-20 pointer-events-none' : 'hover:shadow-md'}`}><ChevronLeft size={20}/></Link>
-              <Link href={`?q=${query}&page=${Math.min(totalPages, page + 1)}`} className={`p-3 rounded-2xl border bg-white ${page >= totalPages ? 'opacity-20 pointer-events-none' : 'hover:shadow-md'}`}><ChevronRight size={20}/></Link>
-            </div>
+                  return (
+                    <tr key={p.id} className={`hover:bg-slate-50/50 transition-all ${!p.published && 'opacity-40 grayscale'}`}>
+                      <td className="p-4 text-center">
+                        <VisibilityToggle id={p.id} initialState={p.published} />
+                      </td>
+                      <td className="p-4">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{p.internalSku}</p>
+                        <p className="font-black text-[#0f172a] uppercase leading-tight line-clamp-2">{p.name}</p>
+                      </td>
+                      <td className="p-4 font-bold text-slate-500">
+                        ${res.costoNeto.toLocaleString()}
+                      </td>
+                      <td className="p-4">
+                        <MarginEditor id={p.id} currentMargin={p.customMargin} />
+                      </td>
+                      <td className="p-4">
+                        <p className="text-base font-black text-[#103f79]">${res.precioContado.toLocaleString()}</p>
+                        <p className="text-[9px] font-bold text-green-600 uppercase">Ganas: ${(res.precioContado - res.costoNeto).toLocaleString()}</p>
+                      </td>
+                      <td className="p-4">
+                        <p className="font-black text-indigo-700">${res.precioWeb.toLocaleString()}</p>
+                        <p className="text-[10px] font-bold text-indigo-300">3 x ${res.valorCuota.toLocaleString()}</p>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
+
+          <footer className="p-6 bg-slate-50 border-t flex justify-between items-center">
+            <span className="text-[10px] font-black text-slate-300 uppercase">Página {page} de {totalPages}</span>
+            <div className="flex gap-2">
+              <Link href={`?q=${query}&page=${Math.max(1, page - 1)}`} className="p-2 bg-white rounded-xl border border-slate-200"><ChevronLeft size={18} /></Link>
+              <Link href={`?q=${query}&page=${Math.min(totalPages, page + 1)}`} className="p-2 bg-white rounded-xl border border-slate-200"><ChevronRight size={18} /></Link>
+            </div>
+          </footer>
         </div>
       </div>
     </div>
