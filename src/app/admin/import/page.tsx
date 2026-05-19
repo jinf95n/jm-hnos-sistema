@@ -92,7 +92,7 @@ export default function ImportPage() {
             <Loader2 className="animate-spin text-[#103f79] mx-auto mb-6" size={48} />
             <h2 className="text-2xl font-black text-[#103f79] mb-2 uppercase">Procesando {status.provider}</h2>
             <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.2em] mb-8">
-              {status.current.toLocaleString()} de {status.total.toLocaleString()} productos
+              {status.current.toLocaleString('es-AR', { maximumFractionDigits: 0 })} de {status.total.toLocaleString('es-AR', { maximumFractionDigits: 0 })} productos
             </p>
             <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden mb-4">
               <div 
@@ -149,7 +149,7 @@ export default function ImportPage() {
                 <CheckCircle2 size={20} />
                 <p className="font-black text-xs uppercase tracking-widest">Sincronización Exitosa</p>
               </div>
-              <p className="text-[10px] font-bold opacity-70">{status.total.toLocaleString()} productos actualizados</p>
+              <p className="text-[10px] font-bold opacity-70">{status.total.toLocaleString('es-AR', { maximumFractionDigits: 0 })} productos actualizados</p>
             </div>
           )}
         </div>

@@ -69,18 +69,18 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                         <p className="font-black text-[#0f172a] uppercase leading-tight line-clamp-2">{p.name}</p>
                       </td>
                       <td className="p-4 font-bold text-slate-500">
-                        ${res.costoNeto.toLocaleString()}
+                        ${res.costoNeto.toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                       </td>
                       <td className="p-4">
                         <MarginEditor id={p.id} currentMargin={p.customMargin} />
                       </td>
                       <td className="p-4">
-                        <p className="text-base font-black text-[#103f79]">${res.precioContado.toLocaleString()}</p>
-                        <p className="text-[9px] font-bold text-green-600 uppercase">Ganas: ${(res.precioContado - res.costoNeto).toLocaleString()}</p>
+                        <p className="text-base font-black text-[#103f79]">${res.precioContado.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</p>
+                        <p className="text-[9px] font-bold text-green-600 uppercase">Ganas: ${(res.precioContado - res.costoNeto).toLocaleString('es-AR', { maximumFractionDigits: 0 })}</p>
                       </td>
                       <td className="p-4">
-                        <p className="font-black text-indigo-700">${res.precioWeb.toLocaleString()}</p>
-                        <p className="text-[10px] font-bold text-indigo-300">3 x ${res.valorCuota.toLocaleString()}</p>
+                        <p className="font-black text-indigo-700">${res.precioWeb.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</p>
+                        <p className="text-[10px] font-bold text-indigo-300">3 x ${res.valorCuota.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</p>
                       </td>
                     </tr>
                   );
