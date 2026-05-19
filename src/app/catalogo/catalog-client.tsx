@@ -130,60 +130,60 @@ export default function CatalogClient({ initialProducts, initialQuery }: { initi
         ))}
       </div>
 
-      {/* --- MODAL DE DETALLE DE PRODUCTO --- */}
-      {selectedProduct && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl relative animate-in zoom-in-95 duration-200 text-center sm:text-left">
-            <button 
-              onClick={() => setSelectedProduct(null)}
-              className="absolute right-6 top-6 p-2 bg-slate-100 rounded-full text-slate-400 hover:bg-slate-200"
-            >
-              <X size={20} />
-            </button>
-            
-            <span className="text-[10px] font-black text-[#f3b229] uppercase tracking-[0.2em] mb-4 block">Detalle de Artículo</span>
-            <h2 className="text-xl sm:text-2xl font-black text-[#103f79] uppercase leading-tight mb-6">
-              {selectedProduct.name}
-            </h2>
-            
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase mb-1">SKU Interno</p>
-                <p className="font-bold text-sm text-slate-700">{selectedProduct.sku}</p>
-              </div>
-              <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Disponibilidad</p>
-                <p className="font-bold text-sm text-green-600">Bajo Pedido</p>
-              </div>
-            </div>
-
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between items-center p-5 bg-[#103f79] rounded-3xl text-white shadow-xl shadow-[#103f79]/20">
-                <div className="text-left">
-                  <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">3 Cuotas S/ Interés</p>
-                  <p className="text-xs opacity-80">Precio de Lista</p>
-                </div>
-                <p className="text-3xl font-black">${selectedProduct.price.toLocaleString()}</p>
-              </div>
-
-              <div className="flex justify-between items-center p-5 bg-green-50 rounded-3xl border border-green-100 text-green-700">
-                <div className="text-left">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-green-600">Pago Contado</p>
-                  <p className="text-xs text-green-500">Transferencia / Efectivo</p>
-                </div>
-                <p className="text-2xl font-black">${selectedProduct.cashPrice.toLocaleString()}</p>
-              </div>
-            </div>
-
-            <button 
-              onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
-              className="w-full bg-[#f3b229] text-[#103f79] py-5 rounded-[1.5rem] font-black uppercase tracking-widest hover:scale-[1.02] transition-transform shadow-lg shadow-[#f3b229]/20"
-            >
-              Agregar al carrito
-            </button>
-          </div>
+      {/* --- MODAL DE DETALLE DE PRODUCTO REFINADO --- */}
+{selectedProduct && (
+  <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-[#0f172a]/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl relative animate-in zoom-in-95 duration-200">
+      <button 
+        onClick={() => setSelectedProduct(null)}
+        className="absolute right-4 top-4 p-1.5 bg-slate-50 rounded-full text-slate-400 hover:bg-slate-100 transition-colors"
+      >
+        <X size={18} />
+      </button>
+      
+      <span className="text-[9px] font-black text-[#f3b229] uppercase tracking-widest mb-2 block text-center sm:text-left">Detalle Técnico</span>
+      <h2 className="text-lg font-black text-[#103f79] uppercase leading-tight mb-5 text-center sm:text-left">
+        {selectedProduct.name}
+      </h2>
+      
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center sm:text-left">
+          <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Código</p>
+          <p className="font-bold text-xs text-slate-600">{selectedProduct.sku}</p>
         </div>
-      )}
+        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center sm:text-left">
+          <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Estado</p>
+          <p className="font-bold text-xs text-green-600 uppercase">Disponible</p>
+        </div>
+      </div>
+
+      <div className="space-y-3 mb-6">
+        <div className="flex justify-between items-center p-4 bg-[#103f79] rounded-2xl text-white shadow-lg shadow-[#103f79]/10">
+          <div className="text-left leading-none">
+            <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest mb-1">3 Cuotas S/ Interés</p>
+            <p className="text-[10px] opacity-80">Precio de Lista</p>
+          </div>
+          <p className="text-2xl font-black">${selectedProduct.price.toLocaleString()}</p>
+        </div>
+
+        <div className="flex justify-between items-center p-4 bg-green-50 rounded-2xl border border-green-100 text-green-700">
+          <div className="text-left leading-none">
+            <p className="text-[9px] font-black uppercase tracking-widest text-green-600 mb-1">Pago Contado</p>
+            <p className="text-[10px] text-green-500">Ahorro Aplicado</p>
+          </div>
+          <p className="text-xl font-black">${selectedProduct.cashPrice.toLocaleString()}</p>
+        </div>
+      </div>
+
+      <button 
+        onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
+        className="w-full bg-[#f3b229] text-[#103f79] py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-[#f3b229]/20"
+      >
+        Sumar al Pedido
+      </button>
+    </div>
+  </div>
+)}
       {/* DRAWER DEL CARRITO MÁS DELGADO */}
       <div className={`fixed inset-y-0 right-0 z-[110] w-full sm:w-[380px] bg-white shadow-2xl transform transition-transform duration-500 ease-in-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="h-full flex flex-col p-6">
