@@ -59,7 +59,8 @@ export default async function CatalogPage({
         prov?.providerPrice || 0,
         prov?.provider?.baseDiscount || 0,
         p.baseMargin,
-        p.cardInterest
+        p.cardInterest,
+        p.customMargin
       );
       return {
         id: p.id,
