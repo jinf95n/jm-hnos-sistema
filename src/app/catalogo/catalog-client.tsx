@@ -28,6 +28,22 @@ export default function CatalogClient({
   const router = useRouter();
 
   useEffect(() => {
+  const savedCart = localStorage.getItem('jm-hnos-cart');
+  if (savedCart) {
+    try {
+      setCart(JSON.parse(savedCart));
+    } catch (e) {
+      console.error("Error cargando carrito");
+    }
+  }
+}, []);
+
+// 2. Guardar carrito cuando cambie
+useEffect(() => {
+  localStorage.setItem('jm-hnos-cart', JSON.stringify(cart));
+}, [cart]);
+
+  useEffect(() => {
     if (searchTerm === initialQuery) return;
     const delay = setTimeout(() => {
       startTransition(() => {

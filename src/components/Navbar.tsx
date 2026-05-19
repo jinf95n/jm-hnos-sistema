@@ -31,8 +31,8 @@ export default function Navbar() {
   const isInsideAdmin = pathname.startsWith("/admin");
 
   return (
-    <header className="sticky top-0 z-[100] w-full bg-[#103f79] border-b-4 border-[#f3b229] shadow-lg">
-      <nav className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+    <header className="sticky top-0 z-[100] w-full bg-[#103f79] border-b-4 border-[#f3b229] shadow-lg overflow-x-hidden">
+      <nav className="w-full max-w-7xl mx-auto px-4 h-16 sm:h-20 flex justify-between items-center">
         {/* LOGO Y NAVEGACIÓN */}
         <div className="flex items-center gap-4">
           <Link href="/catalogo" className="flex items-center gap-3">
@@ -41,10 +41,9 @@ export default function Navbar() {
               <img
                 src="/logo-navbar.png"
                 alt="JM HNOS"
-                className="h-12 px-4 w-auto object-contain" 
+                className="h-12 px-4 w-auto object-contain"
               />
             </div>
-            
           </Link>
 
           {isAdmin && (

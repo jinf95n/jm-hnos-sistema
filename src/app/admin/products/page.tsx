@@ -7,6 +7,7 @@ import Link from "next/link";
 import AdminSearch from "./admin-search";
 import VisibilityToggle from "./visibility-toggle";
 import MarginEditor from "./margin-editor";
+import ProductRowName from "./product-row-client";
 
 export default async function AdminProductsPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
   const params = await searchParams;
@@ -66,7 +67,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                       </td>
                       <td className="p-4">
                         <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{p.internalSku}</p>
-                        <p className="font-black text-[#0f172a] uppercase leading-tight line-clamp-2">{p.name}</p>
+                        <ProductRowName product={p} prices={res} />
                       </td>
                       <td className="p-4 font-bold text-slate-500">
                         ${res.costoNeto.toLocaleString('es-AR', { maximumFractionDigits: 0 })}
