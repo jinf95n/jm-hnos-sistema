@@ -1,15 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
-import { LogOut, ShieldCheck, Loader2 } from "lucide-react";
+import { LogOut, ShieldCheck, LayoutGrid, List, Loader2, User } from "lucide-react";
 import { ADMIN_EMAILS } from "@/app/lib/config";
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isExiting, setIsExiting] = useState(false); // Estado para la salida
+  const [isExiting, setIsExiting] = useState(false);
   
   const pathname = usePathname();
   const supabase = createBrowserClient(
@@ -22,92 +22,65 @@ export default function Navbar() {
       setUser(data.user);
       setLoading(false);
     });
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT') {
-        window.location.replace('/login');
-      } else if (session) {
-        setUser(session.user);
-      }
+      if (event === 'SIGNED_OUT') window.location.replace('/login');
+      else if (session) setUser(session.user);
     });
-    
     return () => subscription.unsubscribe();
   }, [supabase]);
 
-  // 1. GHOST NAVBAR: Evita el parpadeo y saltos de diseño mientras carga
-  if (loading) {
-    return (
-      <header className="sticky top-0 z-[100] w-full bg-[#103f79] border-b-4 border-[#f3b229] shadow-lg h-16 sm:h-20 animate-pulse">
-        <div className="max-w-7xl mx-auto px-4 h-full flex items-center">
-           <div className="w-32 h-8 bg-white/10 rounded-lg"></div>
-        </div>
-      </header>
-    );
-  }
+  if (loading) return (
+    <header className="sticky top-0 z-[100] w-full bg-[#103f79] border-b-4 border-[#f3b229] h-16 sm:h-20 animate-pulse" />
+  );
 
   if (!user) return null;
 
   const isAdmin = ADMIN_EMAILS.includes(user.email);
   const isInsideAdmin = pathname.startsWith("/admin");
 
-  const handleSignOut = async () => {
-    setIsExiting(true); // Activamos el efecto visual de salida inmediato
-    await supabase.auth.signOut();
-  };
-
   return (
     <>
-      {/* 2. EXIT OVERLAY: Pantalla de transición elegante al salir */}
       {isExiting && (
-        <div className="fixed inset-0 z-[200] bg-[#103f79] flex flex-col items-center justify-center text-white animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[200] bg-[#103f79] flex flex-col items-center justify-center text-white">
           <Loader2 className="animate-spin mb-4" size={40} />
-          <p className="font-black uppercase tracking-[0.2em] text-xs">Cerrando Sesión...</p>
+          <p className="font-black uppercase tracking-widest text-xs">Cerrando...</p>
         </div>
       )}
 
-      <header className="sticky top-0 z-[100] w-full bg-[#103f79] border-b-4 border-[#f3b229] shadow-lg overflow-x-hidden">
-        <nav className="w-full max-w-7xl mx-auto px-4 h-16 sm:h-20 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Link href="/catalogo" className="flex items-center gap-3">
-              <div className="flex items-center justify-center py-2">
-                <img
-                  src="/logo-navbar.png"
-                  alt="JM HNOS"
-                  className="h-12 px-4 w-auto object-contain"
-                />
-              </div>
+      <header className="sticky top-0 z-[100] w-full bg-[#103f79] border-b-4 border-[#f3b229] shadow-lg">
+        <nav className="max-w-7xl mx-auto px-2 sm:px-4 h-16 sm:h-20 flex justify-between items-center">
+          
+          {/* IZQUIERDA: Logo y Admin */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Link href="/catalogo" className="shrink-0">
+              <img src="/logo-navbar.png" alt="JM" className="h-10 sm:h-12 w-auto object-contain" />
             </Link>
 
             {isAdmin && (
-              <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl">
-                <Link
-                  href="/admin"
-                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${pathname === "/admin" ? "bg-[#f3b229] text-[#103f79]" : "text-white/50 hover:text-white"}`}
-                >
-                  Dashboard
+              <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+                <Link href="/admin" className={`p-2 sm:px-3 sm:py-1.5 rounded-lg transition-all ${pathname === "/admin" ? "bg-[#f3b229] text-[#103f79]" : "text-white/50 hover:text-white"}`}>
+                  <LayoutGrid size={18} className="sm:hidden" />
+                  <span className="hidden sm:inline text-[9px] font-black uppercase tracking-widest">Dashboard</span>
                 </Link>
-                <Link
-                  href="/admin/products"
-                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${pathname === "/admin/products" ? "bg-[#f3b229] text-[#103f79]" : "text-white/50 hover:text-white"}`}
-                >
-                  Inventario
+                <Link href="/admin/products" className={`p-2 sm:px-3 sm:py-1.5 rounded-lg transition-all ${pathname === "/admin/products" ? "bg-[#f3b229] text-[#103f79]" : "text-white/50 hover:text-white"}`}>
+                  <List size={18} className="sm:hidden" />
+                  <span className="hidden sm:inline text-[9px] font-black uppercase tracking-widest">Inventario</span>
                 </Link>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end leading-none mr-2">
-              <span className="text-[8px] font-black text-[#f3b229] uppercase mb-1">
-                Profesional
-              </span>
-              <span className="text-xs font-bold text-white/90">
+          {/* DERECHA: Usuario y Salir */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex flex-col items-end leading-none">
+              <span className="hidden xs:block text-[7px] sm:text-[8px] font-black text-[#f3b229] uppercase mb-0.5">Profesional</span>
+              <span className="text-[10px] sm:text-xs font-bold text-white/90 max-w-[70px] sm:max-w-[120px] truncate uppercase">
                 {user.email?.split("@")[0]}
               </span>
             </div>
             <button
-              onClick={handleSignOut}
-              className="p-2 text-white/30 hover:text-red-400 transition-colors"
+              onClick={async () => { setIsExiting(true); await supabase.auth.signOut(); }}
+              className="p-2 text-white/30 hover:text-red-400 bg-white/5 rounded-lg"
             >
               <LogOut size={18} />
             </button>
