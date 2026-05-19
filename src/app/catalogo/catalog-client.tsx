@@ -28,7 +28,7 @@ export default function CatalogClient({
 
   // 1. Cargar carrito al iniciar
   useEffect(() => {
-    const savedCart = localStorage.getItem('jm-hnos-cart');
+    const savedCart = localStorage.getItem("jm-hnos-cart");
     if (savedCart) {
       try {
         setCart(JSON.parse(savedCart));
@@ -40,7 +40,7 @@ export default function CatalogClient({
 
   // 2. Guardar carrito cuando cambie
   useEffect(() => {
-    localStorage.setItem('jm-hnos-cart', JSON.stringify(cart));
+    localStorage.setItem("jm-hnos-cart", JSON.stringify(cart));
   }, [cart]);
 
   // Debounce para búsqueda
@@ -233,35 +233,60 @@ export default function CatalogClient({
 
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center sm:text-left">
-                <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Código</p>
-                <p className="font-bold text-xs text-slate-600">{selectedProduct.sku}</p>
+                <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">
+                  Código
+                </p>
+                <p className="font-bold text-xs text-slate-600">
+                  {selectedProduct.sku}
+                </p>
               </div>
               <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center sm:text-left">
-                <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Estado</p>
-                <p className="font-bold text-xs text-green-600 uppercase">Disponible</p>
+                <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">
+                  Estado
+                </p>
+                <p className="font-bold text-xs text-green-600 uppercase">
+                  Disponible
+                </p>
               </div>
             </div>
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between items-center p-4 bg-[#103f79] rounded-2xl text-white shadow-lg shadow-[#103f79]/10">
                 <div className="text-left leading-none">
-                  <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest mb-1">3 Cuotas S/ Interés</p>
+                  <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest mb-1">
+                    3 Cuotas S/ Interés
+                  </p>
                   <p className="text-[10px] opacity-80">Precio de Lista</p>
                 </div>
-                <p className="text-2xl font-black">${selectedProduct.price.toLocaleString("es-AR", { maximumFractionDigits: 0 })}</p>
+                <p className="text-2xl font-black">
+                  $
+                  {selectedProduct.price.toLocaleString("es-AR", {
+                    maximumFractionDigits: 0,
+                  })}
+                </p>
               </div>
 
               <div className="flex justify-between items-center p-4 bg-green-50 rounded-2xl border border-green-100 text-green-700">
                 <div className="text-left leading-none">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-green-600 mb-1">Pago Contado</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-green-600 mb-1">
+                    Pago Contado
+                  </p>
                   <p className="text-[10px] text-green-500">Ahorro Aplicado</p>
                 </div>
-                <p className="text-xl font-black">${selectedProduct.cashPrice.toLocaleString("es-AR", { maximumFractionDigits: 0 })}</p>
+                <p className="text-xl font-black">
+                  $
+                  {selectedProduct.cashPrice.toLocaleString("es-AR", {
+                    maximumFractionDigits: 0,
+                  })}
+                </p>
               </div>
             </div>
 
             <button
-              onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
+              onClick={() => {
+                addToCart(selectedProduct);
+                setSelectedProduct(null);
+              }}
               className="w-full bg-[#f3b229] text-[#103f79] py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-[#f3b229]/20"
             >
               Sumar al Pedido
@@ -277,10 +302,17 @@ export default function CatalogClient({
         <div className="h-full flex flex-col p-6">
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h2 className="text-xl font-black text-[#103f79] tracking-tighter">MI PEDIDO</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{cartCount} ítems</p>
+              <h2 className="text-xl font-black text-[#103f79] tracking-tighter">
+                MI PEDIDO
+              </h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                {cartCount} ítems
+              </p>
             </div>
-            <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+            <button
+              onClick={() => setIsCartOpen(false)}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            >
               <X size={20} className="text-slate-400" />
             </button>
           </div>
@@ -288,22 +320,47 @@ export default function CatalogClient({
           <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
             {cartItems.length > 0 ? (
               cartItems.map((item: any) => (
-                <div key={item.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"
+                >
                   <div className="flex-1 mr-3">
-                    <h4 className="text-[10px] font-bold text-[#103f79] uppercase leading-tight line-clamp-1">{item.name}</h4>
-                    <p className="text-[9px] text-slate-400 font-bold mt-0.5">${item.price.toLocaleString("es-AR", { maximumFractionDigits: 0 })} un.</p>
+                    <h4 className="text-[10px] font-bold text-[#103f79] uppercase leading-tight line-clamp-1">
+                      {item.name}
+                    </h4>
+                    <p className="text-[9px] text-slate-400 font-bold mt-0.5">
+                      $
+                      {item.price.toLocaleString("es-AR", {
+                        maximumFractionDigits: 0,
+                      })}{" "}
+                      un.
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-100">
-                    <button onClick={() => removeFromCart(item.id)} className="text-slate-300 hover:text-red-500"><Minus size={12} /></button>
-                    <span className="font-bold text-[11px] min-w-[12px] text-center">{item.qty}</span>
-                    <button onClick={() => addToCart(item)} className="text-[#103f79]"><Plus size={12} /></button>
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-slate-300 hover:text-red-500"
+                    >
+                      <Minus size={12} />
+                    </button>
+                    <span className="font-bold text-[11px] min-w-[12px] text-center">
+                      {item.qty}
+                    </span>
+                    <button
+                      onClick={() => addToCart(item)}
+                      className="text-[#103f79]"
+                    >
+                      <Plus size={12} />
+                    </button>
                   </div>
                 </div>
               ))
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-slate-300 gap-2 opacity-50">
                 <ShoppingCart size={32} strokeWidth={1.5} />
-                <p className="font-bold text-[10px] uppercase tracking-widest text-center">Vacio</p>
+                <p className="font-bold text-[10px] uppercase tracking-widest text-center">
+                  Vacio
+                </p>
               </div>
             )}
           </div>
@@ -311,14 +368,59 @@ export default function CatalogClient({
           {cartItems.length > 0 && (
             <div className="mt-6 pt-6 border-t border-slate-100">
               <div className="flex justify-between items-end mb-4 px-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase">Total</span>
-                <span className="text-2xl font-black text-[#103f79]">${cartTotal.toLocaleString("es-AR", { maximumFractionDigits: 0 })}</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase">
+                  Total
+                </span>
+                <span className="text-2xl font-black text-[#103f79]">
+                  $
+                  {cartTotal.toLocaleString("es-AR", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
               </div>
               <button
                 onClick={async () => {
+                  // 1. Guardamos el pedido en la base de datos
                   await saveOrder(cartItems, cartTotal);
-                  const msg = cartItems.map((i) => `${i.qty}x ${i.name}`).join("\n");
-                  window.open(`https://wa.me/5492644444444?text=${encodeURIComponent("🚀 *NUEVO PEDIDO - JM HNOS*\n\n" + msg + "\n\n*Total: $" + cartTotal.toLocaleString("es-AR", { maximumFractionDigits: 0 }) + "*")}`, "_blank");
+
+                  // 2. Calculamos el total de contado (que es la suma de los cashPrice)
+                  const cashTotal = cartItems.reduce(
+                    (acc, item) => acc + item.cashPrice * item.qty,
+                    0,
+                  );
+
+                  // 3. Armamos la lista de productos para el mensaje
+                  const productList = cartItems
+                    .map((i) => `• *${i.qty}x* ${i.name}`)
+                    .join("\n");
+
+                  // 4. Construimos el mensaje con formato profesional
+                  const message = [
+                    `🚀 *NUEVO PEDIDO - JM HNOS*`,
+                    `___________________________`,
+                    ``,
+                    `*DETALLE:*`,
+                    productList,
+                    ``,
+                    `___________________________`,
+                    ``,
+                    `💳 *OPCIÓN TARJETA (3 CUOTAS S/I):*`,
+                    `*Total: $${cartTotal.toLocaleString("es-AR", { maximumFractionDigits: 0 })}*`,
+                    `_(3 cuotas de $${(cartTotal / 3).toLocaleString("es-AR", { maximumFractionDigits: 0 })})_`,
+                    ``,
+                    `💵 *OPCIÓN CONTADO / TRANSF:*`,
+                    `*Total: $${cashTotal.toLocaleString("es-AR", { maximumFractionDigits: 0 })}*`,
+                    `_¡Ahorrás $${(cartTotal - cashTotal).toLocaleString("es-AR", { maximumFractionDigits: 0 })} pagando efectivo!_`,
+                    ``,
+                    `___________________________`,
+                    `*Favor de confirmar stock y entrega.*`,
+                  ].join("\n");
+
+                  // 5. Abrimos WhatsApp
+                  window.open(
+                    `https://wa.me/5492644444444?text=${encodeURIComponent(message)}`,
+                    "_blank",
+                  );
                 }}
                 className="w-full bg-[#103f79] text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#f3b229] hover:text-[#103f79] transition-all shadow-lg"
               >
@@ -330,7 +432,12 @@ export default function CatalogClient({
       </div>
 
       {/* OVERLAY */}
-      {isCartOpen && <div onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-[#0f172a]/40 backdrop-blur-[2px] z-[105]" />}
+      {isCartOpen && (
+        <div
+          onClick={() => setIsCartOpen(false)}
+          className="fixed inset-0 bg-[#0f172a]/40 backdrop-blur-[2px] z-[105]"
+        />
+      )}
     </div>
   );
 }
